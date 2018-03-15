@@ -35,8 +35,11 @@ RCFLAGS = /dWIN32 /r
 
 OBJS = adler32.obj compress.obj crc32.obj deflate.obj gzclose.obj gzlib.obj gzread.obj \
        gzwrite.obj infback.obj inflate.obj inftrees.obj inffast.obj trees.obj uncompr.obj zutil.obj
-OBJA =
+OBJA = contrib\minizip\zip.obj contrib\minizip\unzip.obj contrib\minizip\ioapi.obj
 
+{contrib\minizip\}.c{contrib\minizip\}.obj:
+	$(CC) $(CFLAGS) /I. /c $*.c /Fo$*.obj
+	
 
 # targets
 all: $(STATICLIB) $(SHAREDLIB) $(IMPLIB) \
@@ -155,6 +158,7 @@ clean:
 	-del $(SHAREDLIB)
 	-del $(IMPLIB)
 	-del *.obj
+    -del contrib\minizip\*.obj
 	-del *.res
 	-del *.exp
 	-del *.exe
