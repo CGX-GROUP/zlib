@@ -122,6 +122,38 @@ set(ZLIB_SRCS
     zutil.c
 )
 
+set(MINIZIP_SRCS
+    contrib/minizip/ioapi.c
+    contrib/minizip/mztools.c
+    contrib/minizip/unzip.c
+    contrib/minizip/zip.c
+)
+set(MINIZIP_HDRS
+    contrib/minizip/crypt.h
+    contrib/minizip/ioapi.h
+    contrib/minizip/mztools.h
+    contrib/minizip/unzip.h
+    contrib/minizip/zip.h
+)
+
+if ( NOT UNIX )
+    set(MINIZIP_SRCS
+        contrib/minizip/ioapi.c
+        contrib/minizip/iowin32.c
+        contrib/minizip/mztools.c
+        contrib/minizip/unzip.c
+        contrib/minizip/zip.c
+    )
+    set(MINIZIP_HDRS
+        contrib/minizip/crypt.h
+        contrib/minizip/ioapi.h
+        contrib/minizip/iowin32.h
+        contrib/minizip/mztools.h
+        contrib/minizip/unzip.h
+        contrib/minizip/zip.h
+    )
+endif()
+
 if(NOT MINGW)
     set(ZLIB_DLL_SRCS
         win32/zlib1.rc # If present will override custom build rule below.
@@ -149,9 +181,10 @@ if(MINGW)
     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
 endif(MINGW)
 
-add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS} ${MINIZIP_SRCS} ${MINIZIP_HDRS})
 target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+
+add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS} ${MINIZIP_SRCS} ${MINIZIP_HDRS})
 target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
 set_target_properties(zlib PROPERTIES SOVERSION 1)
