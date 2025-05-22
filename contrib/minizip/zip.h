@@ -113,8 +113,8 @@ typedef const char* zipcharpc;
 #define APPEND_STATUS_CREATEAFTER   (1)
 #define APPEND_STATUS_ADDINZIP      (2)
 
-extern zipFile ZEXPORT zipOpen(const char *pathname, int append);
-extern zipFile ZEXPORT zipOpen64(const void *pathname, int append);
+ZEXTERN zipFile ZEXPORT zipOpen(const char *pathname, int append);
+ZEXTERN zipFile ZEXPORT zipOpen64(const void *pathname, int append);
 /*
   Create a zipfile.
      pathname contain on Windows XP a filename like "c:\\zlib\\zlib113.zip" or on
@@ -134,22 +134,22 @@ extern zipFile ZEXPORT zipOpen64(const void *pathname, int append);
    Of course, you can use RAW reading and writing to copy the file you did not want delete
 */
 
-extern zipFile ZEXPORT zipOpen2(const char *pathname,
+ZEXTERN zipFile ZEXPORT zipOpen2(const char *pathname,
                                 int append,
                                 zipcharpc* globalcomment,
                                 zlib_filefunc_def* pzlib_filefunc_def);
 
-extern zipFile ZEXPORT zipOpen2_64(const void *pathname,
+ZEXTERN zipFile ZEXPORT zipOpen2_64(const void *pathname,
                                    int append,
                                    zipcharpc* globalcomment,
                                    zlib_filefunc64_def* pzlib_filefunc_def);
 
-extern zipFile ZEXPORT zipOpen3(const void *pathname,
+ZEXTERN zipFile ZEXPORT zipOpen3(const void *pathname,
                                 int append,
                                 zipcharpc* globalcomment,
                                 zlib_filefunc64_32_def* pzlib_filefunc64_32_def);
 
-extern int ZEXPORT zipOpenNewFileInZip(zipFile file,
+ZEXTERN int ZEXPORT zipOpenNewFileInZip(zipFile file,
                                        const char* filename,
                                        const zip_fileinfo* zipfi,
                                        const void* extrafield_local,
@@ -160,7 +160,7 @@ extern int ZEXPORT zipOpenNewFileInZip(zipFile file,
                                        int method,
                                        int level);
 
-extern int ZEXPORT zipOpenNewFileInZip64(zipFile file,
+ZEXTERN int ZEXPORT zipOpenNewFileInZip64(zipFile file,
                                          const char* filename,
                                          const zip_fileinfo* zipfi,
                                          const void* extrafield_local,
@@ -189,7 +189,7 @@ extern int ZEXPORT zipOpenNewFileInZip64(zipFile file,
 */
 
 
-extern int ZEXPORT zipOpenNewFileInZip2(zipFile file,
+ZEXTERN int ZEXPORT zipOpenNewFileInZip2(zipFile file,
                                         const char* filename,
                                         const zip_fileinfo* zipfi,
                                         const void* extrafield_local,
@@ -202,7 +202,7 @@ extern int ZEXPORT zipOpenNewFileInZip2(zipFile file,
                                         int raw);
 
 
-extern int ZEXPORT zipOpenNewFileInZip2_64(zipFile file,
+ZEXTERN int ZEXPORT zipOpenNewFileInZip2_64(zipFile file,
                                            const char* filename,
                                            const zip_fileinfo* zipfi,
                                            const void* extrafield_local,
@@ -218,7 +218,7 @@ extern int ZEXPORT zipOpenNewFileInZip2_64(zipFile file,
   Same than zipOpenNewFileInZip, except if raw=1, we write raw file
  */
 
-extern int ZEXPORT zipOpenNewFileInZip3(zipFile file,
+ZEXTERN int ZEXPORT zipOpenNewFileInZip3(zipFile file,
                                         const char* filename,
                                         const zip_fileinfo* zipfi,
                                         const void* extrafield_local,
@@ -235,7 +235,7 @@ extern int ZEXPORT zipOpenNewFileInZip3(zipFile file,
                                         const char* password,
                                         uLong crcForCrypting);
 
-extern int ZEXPORT zipOpenNewFileInZip3_64(zipFile file,
+ZEXTERN int ZEXPORT zipOpenNewFileInZip3_64(zipFile file,
                                            const char* filename,
                                            const zip_fileinfo* zipfi,
                                            const void* extrafield_local,
@@ -260,7 +260,7 @@ extern int ZEXPORT zipOpenNewFileInZip3_64(zipFile file,
     crcForCrypting : crc of file to compress (needed for crypting)
  */
 
-extern int ZEXPORT zipOpenNewFileInZip4(zipFile file,
+ZEXTERN int ZEXPORT zipOpenNewFileInZip4(zipFile file,
                                         const char* filename,
                                         const zip_fileinfo* zipfi,
                                         const void* extrafield_local,
@@ -280,7 +280,7 @@ extern int ZEXPORT zipOpenNewFileInZip4(zipFile file,
                                         uLong flagBase);
 
 
-extern int ZEXPORT zipOpenNewFileInZip4_64(zipFile file,
+ZEXTERN int ZEXPORT zipOpenNewFileInZip4_64(zipFile file,
                                            const char* filename,
                                            const zip_fileinfo* zipfi,
                                            const void* extrafield_local,
@@ -306,23 +306,23 @@ extern int ZEXPORT zipOpenNewFileInZip4_64(zipFile file,
  */
 
 
-extern int ZEXPORT zipWriteInFileInZip(zipFile file,
+ZEXTERN int ZEXPORT zipWriteInFileInZip(zipFile file,
                                        const void* buf,
                                        unsigned len);
 /*
   Write data in the zipfile
 */
 
-extern int ZEXPORT zipCloseFileInZip(zipFile file);
+ZEXTERN int ZEXPORT zipCloseFileInZip(zipFile file);
 /*
   Close the current file in the zipfile
 */
 
-extern int ZEXPORT zipCloseFileInZipRaw(zipFile file,
+ZEXTERN int ZEXPORT zipCloseFileInZipRaw(zipFile file,
                                         uLong uncompressed_size,
                                         uLong crc32);
 
-extern int ZEXPORT zipCloseFileInZipRaw64(zipFile file,
+ZEXTERN int ZEXPORT zipCloseFileInZipRaw64(zipFile file,
                                           ZPOS64_T uncompressed_size,
                                           uLong crc32);
 
@@ -332,14 +332,14 @@ extern int ZEXPORT zipCloseFileInZipRaw64(zipFile file,
   uncompressed_size and crc32 are value for the uncompressed size
 */
 
-extern int ZEXPORT zipClose(zipFile file,
+ZEXTERN int ZEXPORT zipClose(zipFile file,
                             const char* global_comment);
 /*
   Close the zipfile
 */
 
 
-extern int ZEXPORT zipRemoveExtraInfoBlock(char* pData, int* dataLen, short sHeader);
+ZEXTERN int ZEXPORT zipRemoveExtraInfoBlock(char* pData, int* dataLen, short sHeader);
 /*
   zipRemoveExtraInfoBlock -  Added by Mathias Svensson
 

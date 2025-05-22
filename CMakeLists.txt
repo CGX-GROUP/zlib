@@ -93,6 +93,8 @@ set(ZLIB_PUBLIC_HDRS
     ${CMAKE_CURRENT_BINARY_DIR}/zconf.h
     zlib.h
 )
+
+
 set(ZLIB_PRIVATE_HDRS
     crc32.h
     deflate.h
@@ -104,6 +106,7 @@ set(ZLIB_PRIVATE_HDRS
     trees.h
     zutil.h
 )
+  
 set(ZLIB_SRCS
     adler32.c
     compress.c
@@ -122,9 +125,11 @@ set(ZLIB_SRCS
     zutil.c
 )
 
-if(NOT MINGW)
+
+
+If(NOT MINGW)
     set(ZLIB_DLL_SRCS
-        win32/zlib1.rc # If present will override custom build rule below.
+      win32/zlib1.rc # If present will override custom build rule below.
     )
 endif()
 
@@ -149,10 +154,15 @@ if(MINGW)
     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
 endif(MINGW)
 
+
+
+
+
 add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
 set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
 set_target_properties(zlib PROPERTIES SOVERSION 1)
 
@@ -170,6 +180,7 @@ endif()
 if(UNIX)
     # On unix-like platforms the library is almost always called libz
    set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
+
    if(NOT APPLE AND NOT(CMAKE_SYSTEM_NAME STREQUAL AIX))
      set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
    endif()
@@ -178,21 +189,92 @@ elseif(BUILD_SHARED_LIBS AND WIN32)
     set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
 endif()
 
+
+#============================================================================
+# Minizip
+#============================================================================
+
+set(MINIZIP_PUBLIC_HDRS
+    contrib/minizip/ioapi.h
+    contrib/minizip/mztools.h
+    contrib/minizip/unzip.h
+    contrib/minizip/zip.h        
+)
+
+set(MINIZIP_PRIVATE_HDRS
+    contrib/minizip/crypt.h
+)
+
+set (MINIZIP_SRCS
+    contrib/minizip/ioapi.c
+    contrib/minizip/mztools.c
+    contrib/minizip/unzip.c
+    contrib/minizip/zip.c
+)
+
+if (WIN32)
+  set(MINIZIP_PRIVATE_HDRS
+    ${MINIZIP_PRIVATE_HDRS}
+    contrib/minizip/iowin32.h
+  )
+  set(MINIZIP_SRCS
+    ${MINIZIP_SRCS}
+    contrib/minizip/iowin32.c
+  )  
+endif()
+
+add_library(minizip SHARED ${MINIZIP_SRCS} ${MINIZIP_DLL_SRCS} ${MINIZIP_PUBLIC_HDRS} ${MINIZIP_PRIVATE_HDRS})
+target_include_directories(minizip PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
+target_link_libraries(minizip PUBLIC zlib)
+set_target_properties(minizip PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
+set_target_properties(minizip PROPERTIES SOVERSION 1)
+
+add_library(minizipstatic STATIC ${MINIZIP_SRCS} ${MINIZIP_PUBLIC_HDRS} ${MINIZIP_PRIVATE_HDRS})
+target_include_directories(minizipstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+
+if(UNIX)
+   set_target_properties(minizip minizipstatic PROPERTIES OUTPUT_NAME minizip)
+endif()
+
+if(NOT CYGWIN)
+    # This property causes shared libraries on Linux to have the full version
+    # encoded into their final filename.  We disable this on Cygwin because
+    # it causes cygz-${ZLIB_FULL_VERSION}.dll to be created when cygz.dll
+    # seems to be the default.
+    #
+    # This has no effect with MSVC, on that platform the version info for
+    # the DLL comes from the resource file win32/zlib1.rc
+    set_target_properties(minizip PROPERTIES VERSION 1.1)
+endif()
+
+set(MINIZIP_PC ${CMAKE_CURRENT_BINARY_DIR}/minizip.pc)
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/contrib/minizip/minizip.pc.in
+		${MINIZIP_PC} @ONLY)
+
+#============================================================================
+# INSTALL
+#============================================================================
+
 if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    install(TARGETS zlib zlibstatic
+    install(TARGETS zlib zlibstatic minizip minizipstatic
         RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
         ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
         LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
 endif()
 if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
+    install(FILES ${MINIZIP_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}/minizip/")
 endif()
 if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
     install(FILES zlib.3 DESTINATION "${INSTALL_MAN_DIR}/man3")
 endif()
 if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
     install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
+    install(FILES ${MINIZIP_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
 endif()
+
+
 
 #============================================================================
 # Example binaries
@@ -215,4 +297,21 @@ if(ZLIB_BUILD_EXAMPLES)
         target_link_libraries(minigzip64 zlib)
         set_target_properties(minigzip64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
     endif()
+
+    set(EXAMPLE_MINIZIP_CONTRIB_SRC
+        contrib/minizip/minizip.c
+    ) 
+
+    if(WIN32)
+        set(EXAMPLE_MINIZIP_CONTRIB_SRC
+            ${EXAMPLE_MINIZIP_CONTRIB_SRC}
+            contrib/minizip/iowin32.c
+        )
+    endif()
+
+
+    # build example and link with zlib and minizip
+    add_executable(example_minizip ${EXAMPLE_MINIZIP_CONTRIB_SRC} ${MINIZIP_PUBLIC_HDRS})
+    target_link_libraries(example_minizip zlib)
+    target_link_libraries(example_minizip minizip)
 endif()
